@@ -16,8 +16,8 @@
 #define MAX 8
 
 // 0 = preto; 1 = branco;
-char pecas[3] = "BW";
-char casas[3] = "bw";
+char pecas[3] = "OX";
+char casas[3] = "-=";
 
 bool troca = false;
 char tabuleiroLimpo[MAX][MAX];
@@ -57,13 +57,12 @@ void imprimeTabuleiro(){
 }
 
 void colocaPecas(){
-	int cor;
+	int cor, corAdver;
 
 	do {
 		printf("\nQual cor quer jogar? (0 - preto, 1 - branco)\n");
 		scanf("%i", &cor);
 	} while (cor > 1 || cor < 0);
-	
 
 	// pecas player
 	for(int i = MAX-1; i > MAX-4; i--){
@@ -74,26 +73,109 @@ void colocaPecas(){
 		}
 	}
 
+	cor == 1 ? corAdver = 0 : corAdver = 1;
+
 	// pecas adv.
-	// for(int i = 0; i < MAX-5; i++){
-	// 	for(int j = 0; j < MAX; j++){
-	// 		if(tabuleiro[i][j] != casas[cor]){
-	// 			tabuleiro[i][j] = pecas[cor];
-	// 		}
+	for(int i = 0; i < MAX-5; i++){
+		for(int j = 0; j < MAX; j++){
+			if(tabuleiro[i][j] == casas[cor]){
+				tabuleiro[i][j] = pecas[corAdver];
+			}
 			
-	// 	}
-	// }
+		}
+	}
 }
 
-void movePeca(int xOrigin, int yOrigin, int xDest, int yDest){
+// void perguntaPeca(){
+// 	int xOrigin, yOrigin, xDest, yDest;
 
+// 	printf("\nDigite coord. de peca a mover.");
+// 	printf("\nEixo X (horiz.): ");
+// 	scanf("%i", &xOrigin);
+// 	printf("\nEixo Y (vert.): ");
+// 	scanf("%i", &yOrigin);
+
+// 	printf("\nDigite coord. do destino da peca.");
+// 	printf("\nEixo X (horiz.): ");
+// 	scanf("%i", &xDest);
+// 	printf("\nEixo Y (vert.): ");
+// 	scanf("%i", &yDest);
+// }
+
+void movePeca(int corPeca){
+	int xOrigin, yOrigin, xDest, yDest, corAdver;
 	char peca;
 
-	// input digita coord originais
+	bool podeMover = false;
+	bool podeMoverEsquerda = false;
+	bool podeMoverDireita = false;
+	bool podeComer = false;
+
+	// OK | input digita coord originais
 	// verificar se movimento valido (range 0-MAX; peça da cor de quem esta jogando)
-	// lidar com string obtem xOrigin e yOrigin
-	// a partir da origem, retorna movimentos possíveis (ex: esq, dir)
+	// OK | a partir da origem, retorna movimentos possíveis (ex: esq, dir)
 	// comer peça é obrigatorio, mas pede confirmação para prosseguir.
+	
+	while (podeMover == false){
+
+		printf("\nDigite coord. de peca a mover.");
+
+		do {
+			printf("\nEixo X (horiz.): ");
+			scanf("%i", &xOrigin);
+		} while (xOrigin < 1 || xOrigin > MAX);
+
+		printf("\nX OK");
+
+		do {
+			printf("\nEixo Y (vert.): ");
+			scanf("%i", &yOrigin);
+		} while (yOrigin < 1 || yOrigin > MAX);
+
+		printf("\nY OK");
+
+		// ajuste para lidar com array
+		xOrigin -= 1;
+		yOrigin -= 1;
+		
+
+		// VERIFICA MOVIMENTOS POSSIVEIS
+
+		corPeca == 1 ? corAdver = 0 : corAdver = 1;
+
+		for (int i = xOrigin-1; i <= xOrigin+2; i++){
+			if (tabuleiro[yOrigin+1][i] == casas[0]){
+				if (i < xOrigin){
+					podeMoverEsquerda = true;
+				}
+				if (i > xOrigin){
+					podeMoverDireita = true;
+				}
+			} else if (tabuleiro[yOrigin+1][i] == pecas[corAdver]){
+				podeComer = true;
+				yDest = yOrigin + 1;
+				xDest = i;
+			} else {
+				podeMover = false;
+				printf("\nNao ha movimentos possiveis para essa peca. Tente outra.\n");
+				// system("clear");
+				imprimeTabuleiro();
+			}
+
+		}
+	}
+	
+
+	// PEDE ESCOLHER DESTINO
+	if(podeMoverEsquerda) {
+		printf("\nPode mover para Esquerda.");
+	} else if (podeMoverDireita) {
+		printf("\nPode mover para Direita.");
+	} else if (podeMoverDireita && podeMoverEsquerda) {
+		printf("\nPode mover tanto para Esquerda quanto para Direita.");
+	}
+
+	// IF MOVIMENTO PERMITIDO
 
 	// deleta peca
 	peca = tabuleiro[xOrigin][yOrigin];
@@ -115,28 +197,25 @@ void movePeca(int xOrigin, int yOrigin, int xDest, int yDest){
 
 // INTERFACE
 
-void mostrarMenu(){
+int mostrarMenu(){
 	int opcao;
 
-	printf("\nMENU");
-	printf("\n1- novo jogo\n0- sair\n");
-	printf("\nDigite opcao: ");
-	scanf("%i", &opcao);
+	while(1){
+		system("clear");
+		printf("MENU");
+		printf("\n1- novo jogo\n0- sair\n");
+		printf("\nDigite opcao: ");
+		scanf("%i", &opcao);
 
-	switch(opcao){
-		case 0:
-			system("clear");
-			break;
-		case 1:
-			esvaziarTabuleiro();
-			colocaPecas();
-			system("clear");
-			imprimeTabuleiro();
-			break;
-		case 2:
-			printf("a");
-			break;
-		default:
-			printf("\nDigite opcao valida!");
+		if (opcao < 0 || opcao > 1){
+			printf("\nOpcao invalida! Digite novamente.\n");
+		} else if (opcao == 0) {
+			int confirma;
+			printf("\nDeseja realmente sair? (1 confirma, 0 cancela)\n");
+			scanf("%i", &confirma);
+			if (confirma == 1){break;}
+		} else {break;}
 	}
+
+	return opcao;
 }

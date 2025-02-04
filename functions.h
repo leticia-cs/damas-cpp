@@ -9,7 +9,8 @@
 // Function declarations
 void esvaziarTabuleiro();
 void imprimeTabuleiro();
-void mostrarMenu();
+int mostrarMenu();
 void colocaPecas();
+void movePeca(int corPeca);
 
 #endif // FUNCTIONS_H
